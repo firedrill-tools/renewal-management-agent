@@ -240,3 +240,19 @@ def test_actual_normal_model_keeps_literal_file_mentions_without_expansion(tmp_p
         assert "@" + str(canary) in wire
         assert canary.read_text() not in wire
         assert result["status"] == "completed" and result["cleanup_confirmed"]
+
+
+def test_readonly_preview_drops_a_draft_made_inapplicable_by_payment_during_http(
+    tmp_path,
+):
+    def mutate(body, n, request, handler, context):
+        context["store"].change("R-101", 1, {"payment_received": True})
+        return body
+
+    with environment(tmp_path, mutate=mutate, ids=["R-101"]) as e:
+        result = run_tick(**{**e["options"], "allow_writes": False})
+        assert result["results"][0]["current_kind"] == "renewed"
+        assert result["results"][0]["draft"] is None
+        assert result["results"][0]["draft_current"] is False
+        assert not result["business"]["applied_decision_ids"]
+        assert not result["business"]["outbox"] and result["cleanup_confirmed"]

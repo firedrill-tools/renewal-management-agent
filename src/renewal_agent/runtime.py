@@ -257,7 +257,24 @@ def build_owned_graph(owner):
     async def commit(s):
         async def work():
             if not owner.scope["allow_writes"]:
+                current_source = owner.guard()
+                if (
+                    s["current"]["observation"]["context_sha256"]
+                    != current_source["context_sha256"]
+                ):
+                    raise ValueError(
+                        "current readonly observation changed after recheck"
+                    )
                 row = s["current"]["value"]
+                target = next(
+                    t for t in owner.scope["intent"]["targets"] if t["id"] == row["id"]
+                )
+                draft_current = (
+                    s["draft_value"] is not None
+                    and same(row, s["plan"]["value"])
+                    and same(row, target)
+                    and kind(row, day(s["today"])) == s["planned_kind"]
+                )
                 return {
                     "result": {
                         "renewal_id": row["id"],
@@ -265,7 +282,11 @@ def build_owned_graph(owner):
                         "current_kind": kind(row, day(s["today"])),
                         "crm_status": row["crm_status"],
                         "revision": row["revision"],
-                        "draft": s["draft_value"],
+                        "draft": s["draft_value"] if draft_current else None,
+                        "draft_current": draft_current,
+                        "observed_context_sha256": s["current"]["observation"][
+                            "context_sha256"
+                        ],
                     }
                 }
             owner.guard()
