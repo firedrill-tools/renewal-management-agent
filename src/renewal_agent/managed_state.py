@@ -513,6 +513,7 @@ def validate_snapshot(conn, identity, instance_id=None):
                 args["planned_kind"],
                 value,
                 draft_snapshot=original_target,
+                identity_snapshot=original_target,
             )
             consumed.add(read["id"])
             used_plans.add(plan["id"])

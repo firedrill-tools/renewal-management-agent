@@ -120,6 +120,11 @@ def test_managed_atomic_queue_crm_overdue_payment_and_repeat_noop_all_replay_exa
         ({"deadline": "2026-10-28"}, "changed_before_send"),
         ({"email": "other@cedar.example"}, "changed_before_send"),
         ({"deadline": "2026-12-01"}, "not_due"),
+        (
+            {"email": "changed@cedar.example", "payment_received": True},
+            "changed_before_send",
+        ),
+        ({"account": "Different account", "decision": "cancel"}, "changed_before_send"),
     ],
 )
 def test_actual_durable_customer_change_during_draft_is_reobserved_before_atomic_tick(
@@ -137,6 +142,9 @@ def test_actual_durable_customer_change_during_draft_is_reobserved_before_atomic
     current = store.observe(run["credential"], "R-101", "commit")
     result = commit(store, run["credential"], plan, current, draft)
     assert result["value"]["action"] == action
+    if "email" in updates or "account" in updates:
+        assert result["decision"]["status"] == "unchanged"
+        assert store.snapshot()["business"]["renewals"][0]["crm_status"] == "open"
     assert store.snapshot()["business"]["outbox"] == []
     decisions = store.snapshot()["records"]["decisions"]
     assert decisions[0]["operation_id"] is None

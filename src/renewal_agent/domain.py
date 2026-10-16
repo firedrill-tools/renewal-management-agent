@@ -48,7 +48,14 @@ def customer_update(original, renewal_id, updates, *, expected_revision=None):
 
 
 def tick_transition(
-    original, renewal_id, today, planned_kind, draft=None, *, draft_snapshot=None
+    original,
+    renewal_id,
+    today,
+    planned_kind,
+    draft=None,
+    *,
+    draft_snapshot=None,
+    identity_snapshot=None,
 ):
     data = deepcopy(validate(original))
     row = selected(data, renewal_id)
@@ -68,6 +75,20 @@ def tick_transition(
         raise ValueError("exact cooperative date/planned kind required")
     before = deepcopy(row)
     current_kind = kind(row, today)
+    if identity_snapshot is not None:
+        renewal(identity_snapshot)
+        if identity_snapshot["id"] != renewal_id:
+            raise ValueError("tick caller identity belongs to another renewal")
+        if any(
+            identity_snapshot[field] != before[field] for field in ("account", "email")
+        ):
+            return data, {
+                "renewal_id": renewal_id,
+                "action": "changed_before_send",
+                "current_kind": current_kind,
+                "crm_status": row["crm_status"],
+                "revision": row["revision"],
+            }
     if current_kind == "cancelled":
         row["crm_status"], action = "cancelled", "crm_cancelled"
     elif current_kind == "renewed":

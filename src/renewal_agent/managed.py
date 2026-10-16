@@ -545,6 +545,7 @@ class ManagedWorkspace:
                 args["planned_kind"],
                 payload,
                 draft_snapshot=target,
+                identity_snapshot=target,
             )
             return self._decision(
                 conn,
