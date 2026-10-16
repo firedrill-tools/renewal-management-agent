@@ -20,17 +20,62 @@ from .source import canonical, day, digest, identifier, kind, parse, read_origin
 
 class ManagedWorkspace:
     def __init__(self, path, *, timeout=0.25):
+        self._guard_fd = None
+        self.close_attempted = self.closed = False
         supplied = Path(path).absolute()
         self.path = supplied.parent.resolve() / supplied.name
         self.timeout = timeout
         self.identity = self._identity()
         self.instance_id = self.source_raw_sha256 = None
         self.commit_guard = lambda: None
-        current = self.snapshot()
-        self.instance_id = current["source"]["instance_id"]
-        self.source_raw_sha256 = state.sha256(
-            current["original"]["source_document"].encode()
-        )
+        try:
+            self._guard_fd = os.open(
+                self.path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+            )
+            current = self.snapshot()
+            self.instance_id = current["source"]["instance_id"]
+            self.source_raw_sha256 = state.sha256(
+                current["original"]["source_document"].encode()
+            )
+        except BaseException:
+            self.close()
+            raise
+
+    def _guard_identity(self):
+        if self.close_attempted or self._guard_fd is None:
+            raise ValueError("managed source guard is closed")
+        pinned = os.fstat(self._guard_fd)
+        if (
+            pinned.st_nlink != 1
+            or f"{pinned.st_dev}:{pinned.st_ino}" != self.identity["database"]
+            or self._identity() != self.identity
+        ):
+            raise ValueError("original managed database/root identity changed")
+
+    def close(self):
+        if self.close_attempted:
+            raise ValueError("managed source guard close already attempted")
+        self.close_attempted = True
+        fd, self._guard_fd = self._guard_fd, None
+        if fd is not None:
+            os.close(fd)
+        self.closed = True
+
+    def __enter__(self):
+        self._guard_identity()
+        return self
+
+    def __exit__(self, *_exception):
+        self.close()
+
+    def __del__(self):
+        # Fallback for the declared manual source seam. Normal runtime must own
+        # and confirm close explicitly; garbage collection is not run evidence.
+        if getattr(self, "_guard_fd", None) is not None and not self.close_attempted:
+            try:
+                self.close()
+            except OSError:
+                pass
 
     def _identity(self):
         value = self.path.lstat()
@@ -108,8 +153,7 @@ class ManagedWorkspace:
 
     @contextmanager
     def _connect(self, *, write=False, control_only=False):
-        if self._identity() != self.identity:
-            raise ValueError("original managed database/root identity changed")
+        self._guard_identity()
         conn = sqlite3.connect(
             self.path.as_uri() + "?mode=rw",
             uri=True,
@@ -154,10 +198,7 @@ class ManagedWorkspace:
                 # business guard has observed cancellation or failed evidence.
                 if not control_only:
                     self.commit_guard()
-            if self._identity() != self.identity:
-                raise ValueError(
-                    "managed database/root changed before transaction completion"
-                )
+            self._guard_identity()
             conn.commit()
         except BaseException:
             conn.rollback()

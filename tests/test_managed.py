@@ -570,3 +570,28 @@ except ValueError as e:
             os.kill(child.pid, signal.SIGCONT)
             child.kill()
             child.communicate(timeout=5)
+
+
+def test_actual_source_guard_descriptor_is_owned_and_closed_once_without_live_database_connection(
+    tmp_path,
+):
+    import os
+
+    store = seed(tmp_path)
+    descriptor = store._guard_fd
+    assert os.fstat(descriptor).st_ino == store.path.stat().st_ino
+    assert store.snapshot()["business"]["renewals"]
+    store.close()
+    assert store.closed and store.close_attempted
+    with pytest.raises(OSError):
+        os.fstat(descriptor)
+    with pytest.raises(ValueError, match="guard is closed"):
+        store.snapshot()
+    with pytest.raises(ValueError, match="already attempted"):
+        store.close()
+    with ManagedWorkspace(store.path) as another:
+        second = another._guard_fd
+        assert another.instance_id == store.instance_id
+    assert another.closed
+    with pytest.raises(OSError):
+        os.fstat(second)

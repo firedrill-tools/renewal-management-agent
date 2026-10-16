@@ -30,33 +30,36 @@ def main(argv=None):
     change.add_argument("--updates-json", required=True)
     args = parser.parse_args(argv)
     try:
-        if args.command == "init":
-            store = ManagedWorkspace.seed(args.db, args.fixture)
-            value = {
-                "database": str(store.path),
-                "instance_id": store.instance_id,
-                "initialized": True,
-            }
-        elif args.command == "inspect":
-            store = ManagedWorkspace(args.db)
-            if args.renewal_id and not args.today:
-                raise ValueError(
-                    "intent inspection requires an explicit application date"
+        store = (
+            ManagedWorkspace.seed(args.db, args.fixture)
+            if args.command == "init"
+            else ManagedWorkspace(args.db)
+        )
+        with store:
+            if args.command == "init":
+                value = {
+                    "database": str(store.path),
+                    "instance_id": store.instance_id,
+                    "initialized": True,
+                }
+            elif args.command == "inspect":
+                if args.renewal_id and not args.today:
+                    raise ValueError(
+                        "intent inspection requires an explicit application date"
+                    )
+                value = (
+                    store.inspect_intent(args.today, args.renewal_id)
+                    if args.today
+                    else store.snapshot()
                 )
-            value = (
-                store.inspect_intent(args.today, args.renewal_id)
-                if args.today
-                else store.snapshot()
-            )
-        else:
-            if len(args.updates_json) > 8192:
-                raise ValueError("bounded original customer change JSON required")
-            store = ManagedWorkspace(args.db)
-            value = store.change(
-                args.renewal_id,
-                args.revision,
-                parse_json(args.updates_json.encode("utf-8", errors="strict")),
-            )
+            else:
+                if len(args.updates_json) > 8192:
+                    raise ValueError("bounded original customer change JSON required")
+                value = store.change(
+                    args.renewal_id,
+                    args.revision,
+                    parse_json(args.updates_json.encode("utf-8", errors="strict")),
+                )
         print(json.dumps(value, indent=2, ensure_ascii=True, allow_nan=False))
     except (OSError, ValueError, sqlite3.Error) as error:
         print(json.dumps({"error": str(error)}, ensure_ascii=True))
