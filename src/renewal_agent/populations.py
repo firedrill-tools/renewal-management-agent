@@ -6,12 +6,12 @@ import base64
 import json
 from copy import deepcopy
 from functools import lru_cache
-from pathlib import Path
 
 from . import managed_state as state
 from ._dataset_manifest import DATASET_BYTES, DATASET_CASES, DATASET_SHA256
+from .assets import read_asset
 from .domain import customer_update, selected, tick_transition
-from .source import canonical, day, digest, keys, kind, parse, parse_json, read_original
+from .source import canonical, day, digest, keys, kind, parse, parse_json
 
 
 def original_bytes(case, prefix="fixture"):
@@ -108,7 +108,7 @@ def replay(case):
 
 @lru_cache(maxsize=1)
 def _dataset():
-    raw, _identity = read_original(Path(__file__).parent / "data/populations.json")
+    raw = read_asset("populations.json")
     if len(raw) != DATASET_BYTES or state.sha256(raw) != DATASET_SHA256:
         raise ValueError("original pinned renewal population differs")
     value = parse_json(raw)

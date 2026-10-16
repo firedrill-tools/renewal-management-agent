@@ -182,7 +182,7 @@ def main():
         run([python, "scripts/build_populations.py", "--check"], complete)
         proofs["complete_full"] = exercise(python, complete, temp / "complete-case")
         suite = run([python, "-m", "pytest", "-q"], complete)
-        assert "150 passed" in suite, suite
+        assert "152 passed" in suite, suite
         (ROOT / "dist/fresh-complete-pytest.log").write_text(suite)
         python = production_env("complete-production", complete)
         proofs["complete_production"] = exercise(
@@ -196,7 +196,7 @@ def main():
         assert build(temp / "final-repeat.tar.gz")["sha256"] == bundle["sha256"]
     report = {
         **bundle,
-        "checks": "fresh locked wheel/sdist/complete source and production-only; all12 actual private CLI cases/reset; actual installed SDK/HTTP/CLI recovery, missing key, three signals, failed final after commit; fresh150check suite; unchanged source manifest; repeated portable archive bytes",
+        "checks": "fresh locked wheel/sdist/complete source and production-only; all12 actual private CLI cases/reset; actual installed SDK/HTTP/CLI recovery, missing key, three signals, failed final after commit; fresh152check suite; unchanged source manifest; repeated portable archive bytes",
         "environments": proofs,
     }
     (ROOT / "dist/qualification.json").write_text(json.dumps(report, indent=2) + "\n")

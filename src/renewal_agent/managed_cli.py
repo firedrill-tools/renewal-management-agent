@@ -3,10 +3,10 @@
 import argparse
 import json
 import sqlite3
-from pathlib import Path
 
 from .managed import ManagedWorkspace
 from .source import parse_json
+from .assets import read_asset
 
 
 def main(argv=None):
@@ -17,7 +17,8 @@ def main(argv=None):
     commands = parser.add_subparsers(dest="command", required=True)
     init = commands.add_parser("init")
     init.add_argument(
-        "--fixture", default=str(Path(__file__).parent / "data/starter.json")
+        "--fixture",
+        help="Explicit original unshared fixture; default is pinned installed starter",
     )
     inspect = commands.add_parser("inspect")
     inspect.add_argument("--today")
@@ -31,7 +32,11 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         store = (
-            ManagedWorkspace.seed(args.db, args.fixture)
+            (
+                ManagedWorkspace.seed(args.db, args.fixture)
+                if args.fixture
+                else ManagedWorkspace.seed_bytes(args.db, read_asset("starter.json"))
+            )
             if args.command == "init"
             else ManagedWorkspace(args.db)
         )

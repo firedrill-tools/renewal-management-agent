@@ -101,6 +101,11 @@ class ManagedWorkspace:
     @classmethod
     def seed(cls, path, fixture):
         raw, _identity = read_original(fixture)
+        return cls.seed_bytes(path, raw)
+
+    @classmethod
+    def seed_bytes(cls, path, raw):
+        """Explicit human initializer from complete literal fixture bytes."""
         data = parse(raw)
         supplied = Path(path).absolute()
         supplied.parent.mkdir(parents=True, exist_ok=True, mode=0o700)

@@ -302,6 +302,7 @@ dataset = {
 raw = encoded(dataset)
 manifest = (
     f'DATASET_BYTES = {len(raw)}\nDATASET_SHA256 = "{sha(raw)}"\nDATASET_CASES = 12\n'
+    f'STARTER_BYTES = {len(ORIGINAL)}\nSTARTER_SHA256 = "{sha(ORIGINAL)}"\n'
 )
 parser = argparse.ArgumentParser()
 parser.add_argument("--check", action="store_true")
