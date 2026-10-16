@@ -492,3 +492,27 @@ def test_failed_source_constructor_closes_its_actual_guard_and_never_allocates_c
             receipt["lifecycle"]["source_guard_closed"] and receipt["cleanup_confirmed"]
         )
         assert e["store"].path.read_bytes() == before
+
+
+def test_real_writer_lock_during_scope_registration_is_an_honest_busy_failure_without_model_clients(
+    tmp_path,
+):
+    with environment(tmp_path) as e:
+        db = sqlite3.connect(e["store"].path, isolation_level=None)
+        db.execute("BEGIN IMMEDIATE")
+        try:
+            receipt = rejected(e["options"], "database is locked")
+            assert (
+                receipt["allocation"]["source"] and not receipt["allocation"]["scope"]
+            )
+            assert (
+                not receipt["allocation"]["async_client"]
+                and not receipt["allocation"]["sync_client"]
+            )
+            assert not receipt["calls"] and not e["requests"]
+            assert receipt["cleanup_confirmed"], receipt["lifecycle"]
+        finally:
+            db.rollback()
+            db.close()
+        assert not e["store"].snapshot()["records"]["operations"]
+        assert not e["store"].snapshot()["records"]["decisions"]

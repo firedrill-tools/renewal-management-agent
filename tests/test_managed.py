@@ -458,12 +458,15 @@ def test_two_real_processes_register_only_one_cooperative_tick_while_scope_is_ac
 
     store = seed(tmp_path)
     intent = store.inspect_intent(DAY, ["R-101"])
-    source = """import json,sys
+    source = """import json,sys,sqlite3
 from renewal_agent.managed import ManagedWorkspace
 from renewal_agent.source import digest
-s=ManagedWorkspace(sys.argv[1]);payload=json.loads(sys.stdin.readline())
-try:print(json.dumps(s.register_operation(digest('real-process-source-control'),True,payload)),flush=True)
-except ValueError as e:print(json.dumps({'error':str(e)}),flush=True)
+payload=json.loads(sys.stdin.readline())
+try:
+ with ManagedWorkspace(sys.argv[1]) as s:
+  result=s.register_operation(digest('real-process-source-control'),True,payload)
+ print(json.dumps(result),flush=True)
+except (ValueError,sqlite3.Error) as e:print(json.dumps({'error':str(e),'error_type':type(e).__name__}),flush=True)
 """
 
     async def race():
@@ -486,7 +489,12 @@ except ValueError as e:print(json.dumps({'error':str(e)}),flush=True)
             outputs = await asyncio.gather(
                 *(c.communicate((json.dumps(intent) + "\n").encode()) for c in children)
             )
-            assert all(c.returncode == 0 for c in children), outputs
+            for child, (_stdout, stderr) in zip(children, outputs):
+                if child.returncode != 0:
+                    pytest.fail(
+                        "unexpected source caller failure:\n"
+                        + stderr.decode(errors="replace")
+                    )
             return [json.loads(out) for out, _err in outputs]
         finally:
             for child in children:
@@ -496,12 +504,11 @@ except ValueError as e:print(json.dumps({'error':str(e)}),flush=True)
 
     results = asyncio.run(race())
     assert sum("operation" in r for r in results) == 1
-    assert (
-        sum(
-            r.get("error") == "another cooperative model tick is active"
-            for r in results
-        )
-        == 1
+    losers = [r for r in results if "error" in r]
+    assert len(losers) == 1
+    assert losers[0]["error"] in (
+        "another cooperative model tick is active",
+        "database is locked",
     )
     winner = next(r for r in results if "operation" in r)
     assert store.current_operation(winner["credential"])["status"] == "active"
