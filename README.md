@@ -53,8 +53,29 @@ Cancellation, shared deadline and normal SIGINT/SIGTERM/SIGHUP durably close sco
 uv run --locked --group dev pytest -q
 ```
 
-116checks pass locally:71source/managed/actual process checks plus45normal actual SDK/HTTP/compiled graph/CLI/lifecycle checks. They include ordinary queue/CRM/owner-task flow, current customer changes during real HTTP, no-op/readonly, original incomplete/malformed/replayed/oversized/partial/non2xx responses, usage provenance, literal canary, request budget, missing key, partial construction, actual cancellation/deadline/parent/all CLI signals and failed native/source/receipt closes after committed effects. [PLAN.md](PLAN.md) records exact evidence and baseline reproductions. The explicit `run_synthetic_tick`/`build_graph` drafter hooks and JSON Workspace are separate trusted synthetic-human/source-test seams; no unowned default model launch remains.
+The suite covers the original source/managed process contract, actual normal SDK/HTTP/compiled graph/CLI lifecycle and all twelve private cases. It checks ordinary queue/CRM/owner-task flow, current customer changes during real HTTP, no-op/readonly, original incomplete/malformed/replayed/oversized/partial/non2xx responses, usage provenance, literal canary, request budget, missing key, partial construction, actual cancellation/deadline/parent/all CLI signals and failed native/source/receipt closes after committed effects. [PLAN.md](PLAN.md) and [COMPATIBILITY.md](COMPATIBILITY.md) record checkpoint evidence and proof limits. The explicit `run_synthetic_tick`/`build_graph` drafter hooks and JSON Workspace are separate trusted synthetic-human/source-test seams.
 
-Twelve coherent cases/private preserving reset and fresh complete/production-only distribution qualification remain active. Enabled live model/budget/semantic and billing review, qualified new Firedrill persisted cases, real connectors/accounts and publication/license stay parked. This private repository has no license pending publication decisions. Offline controlled outputs do not prove live model decision quality or real customer delivery.
+## Private synthetic cases
+
+```sh
+uv run --locked renewal-cases list
+uv run --locked renewal-cases init --case busy_portfolio --root workspace/case-one
+uv run --locked renewal-cases inspect --root workspace/case-one
+uv run --locked renewal-cases reset --root workspace/case-one --new-root workspace/case-two
+```
+
+There are three cases per starter, busy, ambiguous and boundary profile. The busy world has 48 linked accounts, 24 prior follow-ups, eight owner tasks and 96 actual synthetic-human changes/ticks. Original fixture bytes and complete history replay are pinned. Fresh source has a new UUID/seed and no imported runtime permissions. Inspection is private and model-free. Reset creates a separate new source while preserving old source/effects/receipts; collisions, missing/corrupt/copied/stripped controls and occupied mutexes reject without repair. [Scenarios](scenarios/README.md) explains the cases. Private reference outcomes and during-model setup never enter model messages; the normal runtime only uses current source.
+
+## Distributions
+
+```sh
+uv build
+uv run --locked python scripts/package_source.py
+uv run --locked --group dev python scripts/check_distribution.py
+```
+
+The qualifier installs fresh locked wheel, source distribution, complete source and production-only environments outside the checkout. It exercises every installed private case, preserving reset, normal installed SDK over real owned local HTTP, a missing key, three CLI signals and unfinished second response after three prior commits; the complete source also runs the full suite. A portable complete source archive has normalized metadata and a full byte/hash/mode manifest. Repeated local bytes and exact downloaded Linux artifact equality are required for independent qualification. Wheel/sdist retain installed starter and population data; the complete archive also retains all source/tests/scripts/docs/workflows/lockfile.
+
+Enabled live model/budget/semantic and billing review, qualified new Firedrill persisted cases, real connectors/accounts and publication/license stay parked. This private repository has no license pending publication decisions. Offline controlled outputs do not prove live model decision quality or real customer delivery.
 
 Explore the [Firedrill example catalog](https://github.com/firedrill-tools/firedrill-example-catalog). Product references: [Firedrill](https://firedrill.run/) and its [official documentation](https://docs.firedrill.run/); use the documentation matching a qualified release.

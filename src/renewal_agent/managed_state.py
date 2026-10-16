@@ -5,6 +5,8 @@ from __future__ import annotations
 import base64
 import hashlib
 import uuid
+from collections import OrderedDict
+from threading import RLock
 from copy import deepcopy
 
 from .completion import completed
@@ -48,6 +50,12 @@ PROVENANCE = {
     "prior_human_authentication": None,
     "real_delivery": None,
 }
+
+# Repeated graph guards still reread the actual schema/header/all raw SQL rows.
+# Only a byte-identical, fully validated original image can reuse pure replay.
+# Keep this small and private; callers receive independent parsed objects.
+_validated_images = OrderedDict()
+_image_lock = RLock()
 
 
 def sha256(raw):
@@ -227,10 +235,15 @@ def header(conn, identity, instance_id=None):
     uuid_value(doc["instance_id"])
     if instance_id is not None and instance_id != doc["instance_id"]:
         raise ValueError("original managed renewal UUID changed")
-    if doc["creation"] != "fixture" or doc["population"] is not None:
-        raise ValueError(
-            "unsupported managed population source; pinned case qualification required"
-        )
+    if doc["creation"] == "fixture":
+        if doc["population"] is not None:
+            raise ValueError("fixture source cannot carry population authority")
+    elif doc["creation"] == "population":
+        from .populations import validate_reference
+
+        validate_reference(doc["population"])
+    else:
+        raise ValueError("unknown managed source creation")
     try:
         raw = base64.b64decode(doc["fixture_base64"], validate=True)
     except (ValueError, TypeError):
@@ -301,14 +314,26 @@ def validate_snapshot(conn, identity, instance_id=None):
             for t, limit in LIMITS.items()
         }
     )
-    if (
-        len(tables["business"]) != 1
-        or tables["business"][0]["id"] != 1
-        or tables["seed_state"]
-    ):
-        raise ValueError(
-            "one current business source and no unqualified seed authority required"
-        )
+    original = {
+        "schema": original_schema,
+        "source_document": original_header,
+        "tables": tables,
+    }
+    original_sha256 = digest(original)
+    with _image_lock:
+        cached = _validated_images.get(original_sha256)
+        if cached is not None:
+            _validated_images.move_to_end(original_sha256)
+    if cached is not None:
+        return deepcopy(cached)
+    if len(tables["business"]) != 1 or tables["business"][0]["id"] != 1:
+        raise ValueError("one current business source required")
+    if doc["creation"] == "population":
+        from .populations import validate_seed
+
+        validate_seed(doc, tables, original_schema)
+    elif tables["seed_state"]:
+        raise ValueError("fixture source cannot import seed authority")
     current = validate(json_cell(tables["business"][0]["document"]))
     records = typed_records(tables, doc)
     ops = {o["id"]: o for o in records["operations"]}
@@ -569,18 +594,18 @@ def validate_snapshot(conn, identity, instance_id=None):
             or not any(t["id"] == read["renewal_id"] for t in op["intent"]["targets"])
         ):
             raise ValueError("original scoped observation was never current source")
-    original = {
-        "schema": original_schema,
-        "source_document": original_header,
-        "tables": tables,
-    }
-    return {
+    result = {
         "source": doc,
         "fixture": fixture,
         "original": original,
-        "sha256": digest(original),
+        "sha256": original_sha256,
         "business": business,
         "context": contexts[-1],
         "context_sha256": digest(contexts[-1]),
         "records": records,
     }
+    with _image_lock:
+        _validated_images[original_sha256] = deepcopy(result)
+        while len(_validated_images) > 4:
+            _validated_images.popitem(last=False)
+    return result

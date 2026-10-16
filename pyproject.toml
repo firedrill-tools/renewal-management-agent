@@ -4,7 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "renewal-management-agent"
-version = "0.1.0"
+version = "0.2.0"
+readme = "README.md"
 description = "LangGraph scheduled renewal workflow over synthetic CRM and payment state"
 requires-python = ">=3.12"
 dependencies = ["langgraph==1.2.15", "langchain-openai==1.7.2", "langchain-core==1.6.10", "openai==3.31.0", "httpx2==2.13.1", "langsmith==0.14.9", "pydantic==2.14.1"]
@@ -12,6 +13,7 @@ dependencies = ["langgraph==1.2.15", "langchain-openai==1.7.2", "langchain-core=
 [project.scripts]
 renewal-tick = "renewal_agent.cli:main"
 renewal-state = "renewal_agent.managed_cli:main"
+renewal-cases = "renewal_agent.cases:main"
 
 [dependency-groups]
 dev = ["pytest>=8,<10"]
@@ -21,3 +23,6 @@ packages = ["src/renewal_agent"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "fixtures", "scenarios", "tests", "scripts", ".github", "README.md", "AGENTS.md", "PLAN.md", "COMPATIBILITY.md", "pyproject.toml", "uv.lock", ".gitignore"]
