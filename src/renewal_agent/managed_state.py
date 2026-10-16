@@ -159,6 +159,10 @@ def rows(conn, table, order, limit):
 
 
 def schema(conn):
+    if conn.execute("PRAGMA page_size").fetchone()[0] != 4096:
+        raise ValueError("original managed page size differs")
+    if conn.execute("PRAGMA page_count").fetchone()[0] * 4096 > MAX_DATABASE_BYTES:
+        raise ValueError("projected managed database exceeds size bound before commit")
     if (
         conn.execute("PRAGMA application_id").fetchone()[0] != APPLICATION_ID
         or conn.execute("PRAGMA user_version").fetchone()[0] != SCHEMA_VERSION

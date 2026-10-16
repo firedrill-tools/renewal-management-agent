@@ -35,7 +35,7 @@ The original six tests pass. Actual disposable probes reproduce stale in-window 
 
 ### Managed source checkpoint
 
-68checks now pass, including managed source/current intent/real processes. Model ticks will use an exclusive fresh SQLite source with original fixture/UUID/file/root/schema and complete transition replay. Queue, CRM, owner task and decision effects are atomic. One model scope is active at a time; synthetic-human customer changes can be reread while drafting. Each target needs its own fresh plan/current capabilities and separate write permission. This backend does not enable real email delivery.
+69checks now pass, including managed source/current intent/real processes. Model ticks will use an exclusive fresh SQLite source with original fixture/UUID/file/root/schema and complete transition replay. Queue, CRM, owner task and decision effects are atomic. One model scope is active at a time; synthetic-human customer changes can be reread while drafting. Each target needs its own fresh plan/current capabilities and separate write permission. This backend does not enable real email delivery.
 
 ```sh
 uv sync --locked --group dev
@@ -44,6 +44,6 @@ uv run --locked renewal-state --db workspace/renewals.db inspect --today 2026-10
 uv run --locked renewal-state --db workspace/renewals.db change R-101 --revision 1 --updates-json '{"payment_received":true}'
 ```
 
-These commands are private, model-free source/intent inspection and an explicitly trusted synthetic-human update seam. Inspection grants no runtime read. The normal model tick is being connected to this managed backend and owned native completion/lifecycle controls; the earlier JSON model launch remains unqualified. Keep old source and evidence when creating a fresh database. [PLAN.md](PLAN.md) records the68check proof and remaining work.
+These commands are private, model-free source/intent inspection and an explicitly trusted synthetic-human update seam. Inspection grants no runtime read. The normal model tick is being connected to this managed backend and owned native completion/lifecycle controls; the earlier JSON model launch remains unqualified. Keep old source and evidence when creating a fresh database. [PLAN.md](PLAN.md) records the69check proof and remaining work.
 
 Managed sources retain an owned file descriptor for their lifetime, preventing deleted-inode reuse from disguising a replacement. The private CLI closes it before success. The Linux gate exposed this gap in the first managed checkpoint; the original replacement regression remains and the product binding was corrected. Normal runtime must close the source guard explicitly alongside SDK/HTTP work.

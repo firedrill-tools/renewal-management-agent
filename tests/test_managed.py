@@ -595,3 +595,29 @@ def test_actual_source_guard_descriptor_is_owned_and_closed_once_without_live_da
     assert another.closed
     with pytest.raises(OSError):
         os.fstat(second)
+
+
+def test_real_pending_sqlite_page_growth_is_bounded_before_commit_without_recording_a_draft(
+    monkeypatch, tmp_path
+):
+    from renewal_agent import managed_state
+
+    store = seed(tmp_path)
+    run = scope(store, ["R-101"])
+    plan = store.observe(run["credential"], "R-101", "plan")
+    before = store.snapshot()
+    # Real SQLite allocates pending pages before physical file growth is flushed.
+    # Tighten the actual policy for this controlled oversized native-record test.
+    monkeypatch.setattr(
+        managed_state, "MAX_DATABASE_BYTES", store.path.stat().st_size + 8192
+    )
+    body = native()
+    body["unknown_original"]["large"] = "x" * 65536
+    with pytest.raises(ValueError, match="projected managed database"):
+        store.register_draft(
+            run["credential"], plan["proof"], json.dumps(body).encode()
+        )
+    assert store.snapshot()["sha256"] == before["sha256"]
+    assert not store.snapshot()["records"]["drafts"]
+    store.close_operation(run["credential"])
+    store.close()

@@ -123,6 +123,7 @@ class ManagedWorkspace:
         conn = sqlite3.connect(db.as_uri() + "?mode=rw", uri=True, isolation_level=None)
         conn.row_factory = sqlite3.Row
         try:
+            conn.execute("PRAGMA page_size=4096")
             conn.execute("PRAGMA synchronous=FULL")
             conn.execute("BEGIN IMMEDIATE")
             conn.execute(f"PRAGMA application_id={state.APPLICATION_ID}")
