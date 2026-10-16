@@ -5,22 +5,16 @@ from __future__ import annotations
 import json
 import os
 import uuid
-from copy import deepcopy
 from datetime import date
 from pathlib import Path
 
 from .source import (
     MAX_BYTES,
     canonical,
-    day,
-    digest,
-    draft as validate_draft,
     identifier,
     kind,
-    next_revision,
     parse,
     read_original,
-    renewal,
     validate,
 )
 
@@ -97,31 +91,23 @@ class Workspace:
     def change(
         self, renewal_id: str, *, decision=None, payment_received=None, deadline=None
     ) -> dict:
-        identifier(renewal_id)
-        if decision is not None and (
-            type(decision) is not str or decision not in ("pending", "renew", "cancel")
-        ):
-            raise ValueError("invalid decision")
-        if payment_received is not None and type(payment_received) is not bool:
-            raise ValueError("exact boolean payment required")
-        if deadline is not None:
-            day(deadline)
+        from .domain import customer_update
+
+        updates = {
+            k: v
+            for k, v in (
+                ("decision", decision),
+                ("payment_received", payment_received),
+                ("deadline", deadline),
+            )
+            if v is not None
+        }
         data = self.read()
-        row = next((r for r in data["renewals"] if r["id"] == renewal_id), None)
-        if row is None:
-            raise ValueError("unknown renewal")
-        before = deepcopy(row)
-        for key, value in (
-            ("decision", decision),
-            ("payment_received", payment_received),
-            ("deadline", deadline),
-        ):
-            if value is not None:
-                row[key] = value
-        if canonical(before) != canonical(row):
-            row["revision"] = next_revision(before["revision"])
-            row["crm_status"] = "open"
-            self.save(data)
+        if not updates:
+            return self.get(renewal_id)
+        changed, row = customer_update(data, renewal_id, updates)
+        if canonical(changed) != canonical(data):
+            self.save(changed)
         return row
 
     def commit_tick(
@@ -133,95 +119,12 @@ class Workspace:
         *,
         draft_snapshot=None,
     ) -> dict:
-        identifier(renewal_id)
-        if (
-            type(today) is not date
-            or type(planned_kind) is not str
-            or planned_kind
-            not in (
-                "cancelled",
-                "renewed",
-                "overdue",
-                "not_due",
-                "decision_followup",
-                "payment_followup",
-            )
-        ):
-            raise ValueError("exact cooperative date/planned kind required")
+        from .domain import tick_transition
+
         data = self.read()
-        row = next((r for r in data["renewals"] if r["id"] == renewal_id), None)
-        if row is None:
-            raise ValueError("unknown renewal")
-        before = deepcopy(row)
-        current_kind = kind(row, today)
-        if current_kind == "cancelled":
-            row["crm_status"], action = "cancelled", "crm_cancelled"
-        elif current_kind == "renewed":
-            row["crm_status"], action = "renewed", "crm_renewed"
-        elif current_kind == "overdue":
-            key = f"{renewal_id}:{row['deadline']}:overdue"
-            if not any(t["key"] == key for t in data["tasks"]):
-                data["tasks"].append(
-                    {
-                        "key": key,
-                        "renewal_id": renewal_id,
-                        "reason": "deadline passed without recorded payment or completed cancellation",
-                        "source": before,
-                        "today": today.isoformat(),
-                        "source_sha256": digest(before),
-                    }
-                )
-            row["crm_status"], action = "owner_review", "owner_review"
-        elif current_kind == "not_due":
-            action = "not_due"
-        elif current_kind != planned_kind:
-            action = "changed_before_send"
-        elif draft_snapshot is None:
-            raise ValueError("original complete draft source required")
-        elif canonical(renewal(draft_snapshot)) != canonical(before):
-            action = "changed_before_send"
-        else:
-            validate_draft(draft)
-            key = f"{renewal_id}:{row['deadline']}:{current_kind}"
-            existing = next((m for m in data["outbox"] if m["key"] == key), None)
-            if existing is not None:
-                if (
-                    existing["to"] != row["email"]
-                    or existing["source"]["account"] != row["account"]
-                ):
-                    raise ValueError(
-                        "existing follow-up has a different original recipient/account"
-                    )
-                action = "already_queued"
-            else:
-                data["outbox"].append(
-                    {
-                        "key": key,
-                        "renewal_id": renewal_id,
-                        "to": row["email"],
-                        **deepcopy(draft),
-                        "source": before,
-                        "today": today.isoformat(),
-                        "kind": current_kind,
-                        "source_sha256": digest(before),
-                        "draft_sha256": digest(draft),
-                        "delivery": "synthetic_queued",
-                    }
-                )
-                action = "followup_queued"
-            row["crm_status"] = (
-                "awaiting_payment"
-                if current_kind == "payment_followup"
-                else "awaiting_decision"
-            )
-        if canonical(before) != canonical(row):
-            row["revision"] = next_revision(before["revision"])
-        if action not in ("not_due", "changed_before_send"):
-            self.save(data)
-        return {
-            "renewal_id": renewal_id,
-            "action": action,
-            "current_kind": current_kind,
-            "crm_status": row["crm_status"],
-            "revision": row["revision"],
-        }
+        changed, result = tick_transition(
+            data, renewal_id, today, planned_kind, draft, draft_snapshot=draft_snapshot
+        )
+        if canonical(changed) != canonical(data):
+            self.save(changed)
+        return result

@@ -1,0 +1,10 @@
+{
+  "renewals": [
+    { "id": "R-101", "account": "Northstar", "email": "maya@northstar.example", "deadline": "2026-10-25", "decision": "pending", "payment_received": false, "crm_status": "open", "revision": 1 },
+    { "id": "R-102", "account": "Harbor", "email": "noah@harbor.example", "deadline": "2026-10-20", "decision": "cancel", "payment_received": false, "crm_status": "open", "revision": 1 },
+    { "id": "R-103", "account": "Acme", "email": "lina@acme.example", "deadline": "2026-10-17", "decision": "renew", "payment_received": true, "crm_status": "open", "revision": 1 },
+    { "id": "R-104", "account": "Bayside", "email": "ori@bayside.example", "deadline": "2026-10-10", "decision": "pending", "payment_received": false, "crm_status": "open", "revision": 1 }
+  ],
+  "outbox": [],
+  "tasks": []
+}

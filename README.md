@@ -32,3 +32,16 @@ The original six tests pass. Actual disposable probes reproduce stale in-window 
 ### First source/draft checkpoint
 
 36checks now cover original strict JSON/date/contact/boolean/revision/CRM/source validation, complete linked synthetic queue/task snapshots, original full draft-source binding, changed in-window deadline/recipient/account/revision, aliases, no-op exact bytes and revision exhaustion. Original six LangGraph/payment/cancel/overdue flows pass. Missing or altered source is rejected without repair; previous queue rows without source lineage require a fresh synthetic workspace. Manual source/save and graph injection hooks are trusted synthetic-human/test seams. Managed durable authority, explicit normal write permission and the owned original-native lifecycle remain active in PLAN.md; the normal model launch is still unqualified. Preserve old source/evidence when creating a fresh workspace.
+
+### Managed source checkpoint
+
+67checks now pass, including managed source/current intent/real processes. Model ticks will use an exclusive fresh SQLite source with original fixture/UUID/file/root/schema and complete transition replay. Queue, CRM, owner task and decision effects are atomic. One model scope is active at a time; synthetic-human customer changes can be reread while drafting. Each target needs its own fresh plan/current capabilities and separate write permission. This backend does not enable real email delivery.
+
+```sh
+uv sync --locked --group dev
+uv run --locked renewal-state --db workspace/renewals.db init
+uv run --locked renewal-state --db workspace/renewals.db inspect --today 2026-10-15 --renewal-id R-101
+uv run --locked renewal-state --db workspace/renewals.db change R-101 --revision 1 --updates-json '{"payment_received":true}'
+```
+
+These commands are private, model-free source/intent inspection and an explicitly trusted synthetic-human update seam. Inspection grants no runtime read. The normal model tick is being connected to this managed backend and owned native completion/lifecycle controls; the earlier JSON model launch remains unqualified. Keep old source and evidence when creating a fresh database. [PLAN.md](PLAN.md) records the67check proof and remaining work.

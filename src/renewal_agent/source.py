@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 import re
 import stat
@@ -227,7 +228,10 @@ def validate(data):
     return data
 
 
-def parse(raw):
+def parse_json(raw):
+    if type(raw) is not bytes or len(raw) > 8 * 1024 * 1024:
+        raise ValueError("bounded original JSON bytes required")
+
     def pairs(items):
         result = {}
         for key, value in items:
@@ -239,13 +243,37 @@ def parse(raw):
     def constant(value):
         raise ValueError("nonfinite original renewal JSON")
 
-    return validate(
-        json.loads(
+    def complete(value, depth=0):
+        if depth > 64:
+            raise ValueError("original JSON exceeds nesting bound")
+        if type(value) is str:
+            value.encode("utf-8", errors="strict")
+        elif type(value) is float and not math.isfinite(value):
+            raise ValueError("nonfinite original JSON number")
+        elif type(value) is dict:
+            for key, item in value.items():
+                complete(key, depth + 1)
+                complete(item, depth + 1)
+        elif type(value) is list:
+            for item in value:
+                complete(item, depth + 1)
+
+    try:
+        value = json.loads(
             raw.decode("utf-8", errors="strict"),
             object_pairs_hook=pairs,
             parse_constant=constant,
         )
-    )
+    except RecursionError as error:
+        raise ValueError("original JSON exceeds parser nesting bound") from error
+    complete(value)
+    return value
+
+
+def parse(raw):
+    if type(raw) is not bytes or len(raw) > MAX_BYTES:
+        raise ValueError("complete renewal source exceeds4MiB")
+    return validate(parse_json(raw))
 
 
 def read_original(path):

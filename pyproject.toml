@@ -11,6 +11,7 @@ dependencies = ["langgraph==1.2.15", "langchain-openai==1.7.2", "pydantic>=2.12,
 
 [project.scripts]
 renewal-tick = "renewal_agent.cli:main"
+renewal-state = "renewal_agent.managed_cli:main"
 
 [dependency-groups]
 dev = ["pytest>=8,<10"]
