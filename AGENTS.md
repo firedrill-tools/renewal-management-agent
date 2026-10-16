@@ -1,3 +1,5 @@
 # Agent notes
 
 Keep the scheduler tick explicit and cooperative. Reread payment, decision and deadline state before committing a follow-up; never treat a model draft as authorization to send. Preserve idempotent outbox keys and the overdue owner task. Keep data synthetic and sequential. Do not commit keys or runtime workspace state. Deterministic graph tests are offline evidence, not a live model or Firedrill proof.
+
+First source checkpoint uses strict original JSON and complete draft source binding. Keep manual Workspace/save/build_graph drafter/after_draft as explicitly trusted synthetic-human/test seams, never normal model write authority. Original starter fixture bytes must remain unchanged. Preserve exact already-queued/no-op bytes and safe revisions. Random flushed source replacement and receipt/control effects are separate; task1 still needs durable managed read/intent/decision/partial authority before normal runtime qualification. Original null/missing native finish_reason is still an open normal-runtime defect; source tests are not a completion gate for it.
