@@ -7,7 +7,7 @@ name = "renewal-management-agent"
 version = "0.1.0"
 description = "LangGraph scheduled renewal workflow over synthetic CRM and payment state"
 requires-python = ">=3.12"
-dependencies = ["langgraph==1.2.15", "langchain-openai==1.7.2", "pydantic>=2.12,<3"]
+dependencies = ["langgraph==1.2.15", "langchain-openai==1.7.2", "langchain-core==1.6.10", "openai==3.31.0", "httpx2==2.13.1", "langsmith==0.14.9", "pydantic==2.14.1"]
 
 [project.scripts]
 renewal-tick = "renewal_agent.cli:main"

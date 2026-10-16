@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from renewal_agent.graph import EmailDraft, run_tick
+from renewal_agent.graph import EmailDraft, run_synthetic_tick as run_tick
 from renewal_agent.source import MAX_INTEGER
 from renewal_agent.workspace import Workspace
 

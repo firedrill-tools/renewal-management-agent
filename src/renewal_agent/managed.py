@@ -37,8 +37,12 @@ class ManagedWorkspace:
             self.source_raw_sha256 = state.sha256(
                 current["original"]["source_document"].encode()
             )
-        except BaseException:
-            self.close()
+        except BaseException as error:
+            try:
+                self.close()
+            except BaseException as close_error:
+                error.source_close_error = close_error
+            error._managed_source = self
             raise
 
     def _guard_identity(self):

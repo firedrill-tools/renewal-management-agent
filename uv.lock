@@ -947,8 +947,12 @@ name = "renewal-management-agent"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "httpx2" },
+    { name = "langchain-core" },
     { name = "langchain-openai" },
     { name = "langgraph" },
+    { name = "langsmith" },
+    { name = "openai" },
     { name = "pydantic" },
 ]
 
@@ -959,9 +963,13 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "httpx2", specifier = "==2.13.1" },
+    { name = "langchain-core", specifier = "==1.6.10" },
     { name = "langchain-openai", specifier = "==1.7.2" },
     { name = "langgraph", specifier = "==1.2.15" },
-    { name = "pydantic", specifier = ">=2.12,<3" },
+    { name = "langsmith", specifier = "==0.14.9" },
+    { name = "openai", specifier = "==3.31.0" },
+    { name = "pydantic", specifier = "==2.14.1" },
 ]
 
 [package.metadata.requires-dev]
