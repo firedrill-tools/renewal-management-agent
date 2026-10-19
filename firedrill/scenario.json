@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "2026-10-14",
+  "name": "renewal-management-agent \u2014 actual managed native workflow",
+  "target": {
+    "kind": "command",
+    "argv": [
+      "node",
+      "firedrill/target.mjs"
+    ]
+  },
+  "scenarios": [
+    {
+      "id": "starter_decision",
+      "name": "starter_decision run",
+      "input": {
+        "caseId": "starter_decision",
+        "action": "run",
+        "task": "Inspect the exact current business source and explain the next steps without changing business state.",
+        "allowWrites": false,
+        "intent": null,
+        "today": "2026-10-15",
+        "renewalIds": [
+          "R-101"
+        ]
+      }
+    },
+    {
+      "id": "ambiguous_late_payment",
+      "name": "ambiguous_late_payment run",
+      "input": {
+        "caseId": "ambiguous_late_payment",
+        "action": "run",
+        "task": "Inspect the exact current business source and explain the next steps without changing business state.",
+        "allowWrites": false,
+        "intent": null,
+        "today": "2026-10-15",
+        "renewalIds": [
+          "R-101"
+        ]
+      }
+    },
+    {
+      "id": "busy_portfolio",
+      "name": "busy_portfolio inspect",
+      "input": {
+        "caseId": "busy_portfolio",
+        "action": "inspect",
+        "task": "Inspect the exact current business source and explain the next steps without changing business state.",
+        "allowWrites": false,
+        "intent": null,
+        "today": "2026-10-15",
+        "renewalIds": [
+          "R-101"
+        ]
+      }
+    }
+  ],
+  "repetitions": 1,
+  "concurrency": 1,
+  "limits": {
+    "timeoutMs": 240000,
+    "maxRuns": 3,
+    "maxOutputBytes": 4194304
+  }
+}

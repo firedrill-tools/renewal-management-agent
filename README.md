@@ -79,3 +79,7 @@ The qualifier installs fresh locked wheel, source distribution, complete source 
 Enabled live model/budget/semantic and billing review, qualified new Firedrill persisted cases, real connectors/accounts and publication/license stay parked. This private repository has no license pending publication decisions. Offline controlled outputs do not prove live model decision quality or real customer delivery.
 
 Explore the [Firedrill example catalog](https://github.com/firedrill-tools/firedrill-example-catalog). Product references: [Firedrill](https://firedrill.run/) and its [official documentation](https://docs.firedrill.run/); use the documentation matching a qualified release.
+
+## Current Firedrill integration
+
+Released CLI/SDK 2.2.2, current command invocation, remote operator MCP and recovery are documented in [firedrill/README.md](firedrill/README.md). Offline checks preserve actual private-case/native-key behavior and separate caller intent. Authenticated persisted runs and live quality/cost remain separate parked gates.

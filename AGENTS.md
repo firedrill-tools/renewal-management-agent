@@ -15,3 +15,7 @@ Normal runtime114owns the actual async compiled graph/ChatOpenAI/OpenAI/HTTP and
 Readonly115requires its genuine observation context to remain current and hides drafts whose complete plan/current/caller row or kind no longer agree. Preserve the original generation privately, but do not return an inapplicable draft as a current preview. Source/native verification is sufficient; next build task4rich12case/private init/inspect/preserving reset, then fresh distributions.
 
 Pinned populations retain complete original synthetic-human history; validate all steps and final bytes, but import no runtime operation/read/draft/decision authority. Private seeds and control bind baseline/schema/context/UUID/physical source. Every private source owner must close its guard explicitly. A reset creates a separate fresh root and preserves old effects and receipts. Keep case IDs, private events/reference outcomes and seed/control material out of model context. Use the normal runtime over owned local HTTP for case qualification; a scripted history is not model evidence. Finish complete/production-only distribution and exact Linux downloaded source equality before independent completion.
+
+## Current Firedrill integration
+
+Released CLI/SDK 2.2.2, current command invocation, remote operator MCP and recovery are documented in [firedrill/README.md](firedrill/README.md). Offline checks preserve actual private-case/native-key behavior and separate caller intent. Authenticated persisted runs and live quality/cost remain separate parked gates.
