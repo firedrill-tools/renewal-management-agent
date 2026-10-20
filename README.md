@@ -4,6 +4,8 @@ A LangGraph application runs one explicit renewal tick over fictional local rene
 
 Simulate this LangGraph AI agent with [Firedrill](https://firedrill.run/), a simulation platform for AI agents. Start with the [Firedrill setup and simulation guide](firedrill/README.md); your coding agent can operate it while this application's runner stays in your repository or CI.
 
+This example repository is publicly viewable. A project license has not been selected.
+
 ## Run
 
 Requires Python3.12+ and [uv](https://docs.astral.sh/uv/).
@@ -78,7 +80,7 @@ uv run --locked --group dev python scripts/check_distribution.py
 
 The qualifier installs fresh locked wheel, source distribution, complete source and production-only environments outside the checkout. It exercises every installed private case, preserving reset, normal installed SDK over real owned local HTTP, a missing key, three CLI signals and unfinished second response after three prior commits; the complete source also runs the full suite. A portable complete source archive has normalized metadata and a full byte/hash/mode manifest. Repeated local bytes and exact downloaded Linux artifact equality are required for independent qualification. Wheel/sdist retain installed starter and population data; the complete archive also retains all source/tests/scripts/docs/workflows/lockfile.
 
-Enabled live model/budget/semantic and billing review, authenticated Firedrill persistence verification, real connectors/accounts and publication/license stay parked. This private repository has no license pending publication decisions. Offline controlled outputs do not prove live model decision quality or real customer delivery.
+Enabled live model/budget/semantic and billing review, authenticated Firedrill persistence verification, real connectors/accounts and license stay parked. This public repository has no selected project license. Offline controlled outputs do not prove live model decision quality or real customer delivery.
 
 Explore the [Firedrill example catalog](https://github.com/firedrill-tools/firedrill-example-catalog). Product references: [Firedrill](https://firedrill.run/) and its [official documentation](https://docs.firedrill.run/); use the documentation matching a qualified release.
 
