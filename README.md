@@ -82,7 +82,7 @@ The qualifier installs fresh locked wheel, source distribution, complete source 
 
 Enabled live model/budget/semantic and billing review, authenticated Firedrill persistence verification, real connectors/accounts and license stay parked. This public repository has no selected project license. Offline controlled outputs do not prove live model decision quality or real customer delivery.
 
-Explore the [Firedrill example catalog](https://github.com/firedrill-tools/firedrill-example-catalog). Product references: [Firedrill](https://firedrill.run/) and its [official documentation](https://docs.firedrill.run/); use the documentation matching a qualified release.
+Explore the [Firedrill examples](https://docs.firedrill.run/guides/examples). Product references: [Firedrill](https://firedrill.run/) and its [official documentation](https://docs.firedrill.run/); use the documentation matching a qualified release.
 
 ## Current Firedrill integration
 
